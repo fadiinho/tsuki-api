@@ -1,7 +1,7 @@
 {
   "name": "tsuki-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "A simple API for the best manga reader Tsuki Mangas",
   "main": "dist/index.js",
   "types": "index.d.ts",
   "author": "Fadiinho",
@@ -9,7 +9,8 @@
   "scripts": {
     "dev:tsc": "tsc -w",
     "dev:test": "nodemon dist/test.js",
-    "dev:node": "nodemon dist/index.js"
+    "dev:node": "nodemon dist/index.js",
+    "build": "tsc"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.10",
