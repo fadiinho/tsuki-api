@@ -1,0 +1,24 @@
+{
+  "name": "tsuki-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "index.d.ts",
+  "author": "Fadiinho",
+  "license": "ISC",
+  "scripts": {
+    "dev:tsc": "tsc -w",
+    "dev:test": "nodemon dist/test.js",
+    "dev:node": "nodemon dist/index.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.10",
+    "puppeteer": "^10.4.0"
+  },
+  "packageManager": "yarn@3.1.0",
+  "devDependencies": {
+    "@types/node": "^16.11.9",
+    "@types/puppeteer": "^5.4.4",
+    "typescript": "^4.4.4"
+  }
+}
