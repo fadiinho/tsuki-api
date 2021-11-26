@@ -4,14 +4,25 @@
   "description": "A simple API for the best manga reader Tsuki Mangas",
   "main": "dist/index.js",
   "types": "index.d.ts",
-  "files": ["dist/**/*"],
+  "files": [
+    "dist/**/*"
+  ],
   "author": "Fadiinho",
   "license": "MIT",
+  "key": ["tsuki", "mangas", "api", "tsuki-mangas-api", "tsuki-api"],
   "scripts": {
     "dev:tsc": "tsc -w",
     "dev:test": "nodemon dist/test.js",
     "dev:node": "nodemon dist/index.js",
-    "build": "tsc"
+    "build": "tsc",
+    "test": "jest --detectOpenHandles --config jestconfig.json",
+    "lint": "eslint -c .eslintrc.json",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run lint",
+    "preversion": "npm run lint",
+    "version": "npm run format && git add -a src",
+    "postversion": "git push && git push --tags"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.10",
@@ -19,8 +30,15 @@
   },
   "packageManager": "yarn@3.1.0",
   "devDependencies": {
+    "@types/jest": "^27.0.3",
     "@types/node": "^16.11.9",
     "@types/puppeteer": "^5.4.4",
+    "@typescript-eslint/eslint-plugin": "latest",
+    "@typescript-eslint/parser": "latest",
+    "eslint": "^8.3.0",
+    "jest": "^27.3.1",
+    "prettier": "^2.5.0",
+    "ts-jest": "^27.0.7",
     "typescript": "^4.4.4"
   }
 }

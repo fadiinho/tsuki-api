@@ -20,7 +20,7 @@ interface TsukiApi {
 }
 
 interface Info {
-  id?: number;
+  id?: number | null;
   nome?: string;
   demografia?: string | null;
   generos?: string[];
@@ -59,7 +59,6 @@ class TsukiApi {
     this.pupBrowser = await puppeteer.launch(this.options);
 
     this.pages = await this.pupBrowser.pages();
-
   }
 
   async newPage() {
@@ -86,32 +85,27 @@ class TsukiApi {
     const page = this.pages[pageIndex];
 
     let infoElem;
-    let err: boolean = false;
-    let errorMessage: string = '';
+    let err = false;
 
     try {
       await page.goto(`${this.urls.manga}/${id}`);
       infoElem = await page.waitForSelector(this.selectors.info, {
         timeout: 8000
       });
-    } catch (e: any) {
+    } catch (e) {
       err = true;
-      errorMessage = e.message;
     }
 
     if (err) {
       return {
         id: id,
-        error: 'Alguma coisa deu errada, provavelmente o ID está errado.',
-        errorMessage: errorMessage
+        error: 'Alguma coisa deu errada, provavelmente o ID está errado.'
       };
     }
 
     const infoHtml = await infoElem?.evaluate((el) => el.outerHTML);
 
-    const sinopsisElem = await page.waitForSelector(
-      this.selectors.sinopsis
-    );
+    const sinopsisElem = await page.waitForSelector(this.selectors.sinopsis);
 
     const sinopsisHtml = await sinopsisElem?.evaluate((el) => el.outerHTML);
 
@@ -124,11 +118,11 @@ class TsukiApi {
       $info = cheerio.load(infoHtml);
       $sinopsis = cheerio.load(sinopsisHtml);
     } else {
-      throw new Error("Talvez esse manga não exista.");
+      throw new Error('Talvez esse manga não exista.');
     }
 
     const genres = (t = false) => {
-      let genres: string[] = [];
+      const genres: string[] = [];
       $info(`div:nth-child(${t ? '1' : '2'}) > span > a`).each((_, e) => {
         genres.push($info(e).text());
       });
@@ -169,7 +163,7 @@ class TsukiApi {
     }
   }
 
-  async getDemography(id: number): Promise<null | string> {
+  async getDemography(id: number): Promise<undefined | null | string> {
     if (typeof id !== 'number') {
       throw new Error(`ID tem que ser 'number', recebi "${typeof id}"`);
     }
@@ -180,10 +174,10 @@ class TsukiApi {
       return error;
     }
 
-    return demografia!;
+    return demografia;
   }
 
-  async getGenres(id: number): Promise<null | string[] | string> {
+  async getGenres(id: number): Promise<undefined | string[] | string> {
     if (typeof id !== 'number') {
       throw new Error(`ID tem que ser "number", recebi "${typeof id}"`);
     }
@@ -194,10 +188,10 @@ class TsukiApi {
       return error;
     }
 
-    return generos!;
+    return generos;
   }
 
-  async getFormat(id: number): Promise<null | string> {
+  async getFormat(id: number): Promise<undefined | string> {
     if (typeof id !== 'number') {
       throw new Error(`ID tem que ser "number", recebi "${typeof id}"`);
     }
@@ -208,10 +202,10 @@ class TsukiApi {
       return error;
     }
 
-    return formato!;
+    return formato;
   }
 
-  async getAuthor(id: number): Promise<null | string> {
+  async getAuthor(id: number): Promise<undefined | string> {
     if (typeof id !== 'number') {
       throw new Error(`ID tem que ser "number", recebi "${typeof id}"`);
     }
@@ -221,10 +215,10 @@ class TsukiApi {
     if (error) {
       return error;
     }
-    return autor!;
+    return autor;
   }
 
-  async getArtist(id: number): Promise<null | string> {
+  async getArtist(id: number): Promise<undefined | string> {
     if (typeof id !== 'number') {
       throw new Error(`ID tem que ser "number", recebi "${typeof id}"`);
     }
@@ -235,10 +229,10 @@ class TsukiApi {
       return error;
     }
 
-    return artista!;
+    return artista;
   }
 
-  async getChapters(id: number): Promise<null | string> {
+  async getChapters(id: number): Promise<undefined | string> {
     if (typeof id !== 'number') {
       throw new Error(`ID tem que ser "number", recebi"${typeof id}"`);
     }
@@ -249,10 +243,10 @@ class TsukiApi {
       return error;
     }
 
-    return capitulos!;
+    return capitulos;
   }
 
-  async getStatus(id: number): Promise<null | string> {
+  async getStatus(id: number): Promise<undefined | string> {
     if (typeof id !== 'number') {
       throw new Error(`ID tem que ser "number", recebi "${typeof id}"`);
     }
@@ -263,10 +257,10 @@ class TsukiApi {
       return error;
     }
 
-    return status!;
+    return status;
   }
 
-  async getName(id: number): Promise<null | string> {
+  async getName(id: number): Promise<undefined | string> {
     if (typeof id !== 'number') {
       throw new Error(`ID tem que ser "number", recebi "${typeof id}"`);
     }
@@ -277,7 +271,7 @@ class TsukiApi {
       return error;
     }
 
-    return nome!;
+    return nome;
   }
 
   async getReleases(): Promise<Info[]> {
@@ -299,15 +293,17 @@ class TsukiApi {
 
     page.close();
 
-    let content: Info[] = [];
+    const content: Info[] = [];
     const $ = cheerio.load(outer);
 
     $('.card > .listleft > .mm20 > a').each((_, e) => {
-      const id = parseInt($(e).attr('href')?.split('/')[2]!)
-      content.push({
-        id: id,
-        nome: $(e).text()
-      });
+      const id = $(e).attr('href')?.split('/')[2];
+      if (id) {
+        content.push({
+          id: parseInt(id),
+          nome: $(e).text()
+        });
+      }
     });
 
     $('.card > div > a').each((i, e) => {
@@ -317,18 +313,20 @@ class TsukiApi {
 
     $('.card > .listleft > .scansdpe').each((i, e) => {
       const scans: string[] = [];
-      const html = $(e).html()!;
-      const $e = cheerio.load(html);
+      const html = $(e).html();
+      let $e: CheerioAPI;
+      if (html) {
+        $e = cheerio.load(html);
 
-      $e('a').each((_, el) => {
-        scans.push($e(el).text().replace('group ', ''));
-      });
-
+        $e('a').each((_, el) => {
+          scans.push($e(el).text().replace('group ', ''));
+        });
+      }
       content[i] = {
         ...content[i],
         scans: scans
-      }
-    })
+      };
+    });
 
     $('.card > .listleft > .m10px > li:last-child > a').each((i, e) => {
       content[i] = { ...content[i], ultimoCapitulo: $(e).text() };
@@ -336,8 +334,11 @@ class TsukiApi {
 
     $('.card > .listleft > .m10px > li:first-child > a').each((i, e) => {
       const cap = $(e).text();
-      if (parseInt(cap) > parseInt(content[i].ultimoCapitulo!)) {
-        content[i].ultimoCapitulo = cap;
+      const cap2 = content[i].ultimoCapitulo;
+      if (cap2) {
+        if (parseInt(cap) > parseInt(cap2)) {
+          content[i].ultimoCapitulo = cap;
+        }
       }
     });
 
@@ -354,17 +355,22 @@ class TsukiApi {
     await page.waitForSelector(
       '#app > div.coint > div > div > div:nth-child(1) > input',
       { timeout: 10000 }
-    )
+    );
 
-    const input = await page.$('#app > div.coint > div > div > div:nth-child(1) > input');
+    const input = await page.$(
+      '#app > div.coint > div > div > div:nth-child(1) > input'
+    );
 
     await input?.type(name, { delay: 120 });
 
     await input?.press('Enter');
 
-    await page.waitForSelector('#app > div.coint > div > div > div.adclixo', { timeout: 4000 });
+    await page.waitForSelector('#app > div.coint > div > div > div.adclixo', {
+      timeout: 4000
+    });
 
-    const outer = await page.$eval('#app > div.coint > div > div > div.adclixo',
+    const outer = await page.$eval(
+      '#app > div.coint > div > div > div.adclixo',
       (e: Element) => e.outerHTML
     );
 
@@ -374,20 +380,24 @@ class TsukiApi {
 
     $('.midgame').each((i, e) => {
       if (i + 1 <= options.maxResults) {
-        elements.push(cheerio.load($(e).html()!));
+        const html = $(e).html();
+        if (html) {
+          elements.push(cheerio.load(html));
+        }
       }
-    })
+    });
 
     const results: Info[] = [];
 
-    elements.map(item => {
+    elements.map((item) => {
+      const id = item('a').attr('href')?.split('/')[2].trim();
       results.push({
-        id: parseInt(item('a').attr('href')?.split('/')[2].trim()!),
+        id: id ? parseInt(id) : null,
         nome: item('.titlemangasal').text().trim(),
         capitulos: item('.titlemangasal3').text().replace('Capítulos: ', ''),
         formato: item('.notaslistm2').text()
-      })
-    })
+      });
+    });
 
     return results;
   }
