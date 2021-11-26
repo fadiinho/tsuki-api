@@ -1,3 +1,3 @@
 # Tsuki Mangas API
 
-Uma api simples, feita para o melhor leitor de mangas do MUNDO. 
+Uma api simples, feita para o [melhor leitor de mangas do MUNDO.](https://tsukimangas.com)
