@@ -1,6 +1,6 @@
 {
   "name": "tsuki-api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A simple API for the best manga reader Tsuki Mangas",
   "main": "dist/index.js",
   "types": "index.d.ts",
@@ -9,7 +9,13 @@
   ],
   "author": "Fadiinho",
   "license": "MIT",
-  "key": ["tsuki", "mangas", "api", "tsuki-mangas-api", "tsuki-api"],
+  "key": [
+    "tsuki",
+    "mangas",
+    "api",
+    "tsuki-mangas-api",
+    "tsuki-api"
+  ],
   "scripts": {
     "dev:tsc": "tsc -w",
     "dev:test": "nodemon dist/test.js",
